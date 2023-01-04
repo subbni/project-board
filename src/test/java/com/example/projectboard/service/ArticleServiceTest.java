@@ -4,14 +4,13 @@ import com.example.projectboard.domain.Article;
 import com.example.projectboard.domain.UserAccount;
 import com.example.projectboard.domain.type.SearchType;
 import com.example.projectboard.dto.ArticleDto;
-import com.example.projectboard.dto.ArticleUpdateDto;
 import com.example.projectboard.dto.ArticleWithCommentsDto;
 import com.example.projectboard.dto.UserAccountDto;
 import com.example.projectboard.repository.ArticleRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,12 +19,12 @@ import org.springframework.data.domain.Pageable;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
+
 
 @DisplayName("business logic - 게시글")
 @ExtendWith(MockitoExtension.class) // test시 spring boot를 띄우지 않고, mockito를 사용하여 필요한 의존성을 주입받아 테스트 함
@@ -65,14 +64,14 @@ class ArticleServiceTest {
         SearchType searchType = SearchType.TITLE;
         String searchKeyword = "title";
         Pageable pageable = Pageable.ofSize(20);
-        given(articleRepository.findByTitle(searchKeyword,pageable)).willReturn(Page.empty());
+        given(articleRepository.findByTitleContaining(searchKeyword,pageable)).willReturn(Page.empty());
 
         // When
         Page<ArticleDto> articles = sut.searchArticles(searchType, searchKeyword, pageable);
 
         // Then
         assertThat(articles).isEmpty();
-        then(articleRepository).should().findByTitle(searchKeyword,pageable);
+        then(articleRepository).should().findByTitleContaining(searchKeyword,pageable);
     }
 
     @DisplayName("게시글을 조회하면 게시글을 리턴한다.")
@@ -107,7 +106,7 @@ class ArticleServiceTest {
         // Then
         assertThat(t)
                 .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("게시글이 없습니다 - articleId: " + articleId);
+                .hasMessage("게시글이 없습니다 - articleId: "+articleId);
         then(articleRepository).should().findById(articleId);
     }
 
